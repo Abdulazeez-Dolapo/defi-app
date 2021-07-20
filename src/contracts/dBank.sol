@@ -6,25 +6,36 @@ import "./Token.sol";
 contract dBank {
 
   //assign Token contract to variable
+  Token private token; 
 
   //add mappings
+  mapping (address => uint) public etherBalanceOf;
+  mapping (address => uint) public depositStart;
+  mapping (address => bool) public isDeposited;
 
   //add events
+  event Deposit(address indexed user, uint etherAmount, uint timeStart);
 
   //pass as constructor argument deployed Token contract
-  constructor() public {
+  constructor(Token _token) public {
     //assign token deployed contract to variable
+    token = _token;
   }
 
   function deposit() payable public {
-    //check if msg.sender didn't already deposited funds
-    //check if msg.value is >= than 0.01 ETH
+    //check if msg.sender didn't already deposit funds
+    require(isDeposited[msg.sender] == false, "Error: Deposit already active.");
+    //check if msg.value is >= 0.01 ETH
+    require(msg.value >= 10**16, 'Error: Only deposit of 0.01 ETH and above is allowed');
 
     //increase msg.sender ether deposit balance
+    etherBalanceOf[msg.sender] = etherBalanceOf[msg.sender] + msg.value;
     //start msg.sender hodling time
-
+    depositStart[msg.sender] = depositStart[msg.sender] + block.timestamp;
     //set msg.sender deposit status to true
+    isDeposited[msg.sender] = true; 
     //emit Deposit event
+    emit Deposit(msg.sender, msg.value, block.timestamp); 
   }
 
   function withdraw() public {
