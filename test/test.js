@@ -7,7 +7,7 @@ require("chai").use(require("chai-as-promised")).should()
 
 contract("dBank", ([deployer, user]) => {
 	let dbank, token
-	const interestPerSecond = 31668017 //(10% APY) for min. deposit (0.01 ETH)
+	const interestPerSecond = 31688087 //(10% APY) for min. deposit (0.01 ETH)
 
 	beforeEach(async () => {
 		token = await Token.new()
@@ -86,53 +86,54 @@ contract("dBank", ([deployer, user]) => {
 		})
 	})
 
-	// describe("testing withdraw...", () => {
-	// 	let balance
+	describe("testing withdraw...", () => {
+		let balance
 
-	// 	describe("success", () => {
-	// 		beforeEach(async () => {
-	// 			await dbank.deposit({ value: 10 ** 16, from: user }) //0.01 ETH
+		describe("success", () => {
+			beforeEach(async () => {
+				await dbank.deposit({ value: 10 ** 16, from: user }) //0.01 ETH
 
-	// 			await wait(2) //accruing interest
+				await wait(2) //accruing interest
 
-	// 			balance = await web3.eth.getBalance(user)
-	// 			await dbank.withdraw({ from: user })
-	// 		})
+				balance = await web3.eth.getBalance(user)
+				await dbank.withdraw({ from: user })
+			})
 
-	// 		it("balances should decrease", async () => {
-	// 			expect(Number(await web3.eth.getBalance(dbank.address))).to.eq(0)
-	// 			expect(Number(await dbank.etherBalanceOf(user))).to.eq(0)
-	// 		})
+			it("balances should decrease", async () => {
+				expect(Number(await web3.eth.getBalance(dbank.address))).to.eq(0)
+				expect(Number(await dbank.etherBalanceOf(user))).to.eq(0)
+			})
 
-	// 		it("user should receive ether back", async () => {
-	// 			expect(Number(await web3.eth.getBalance(user))).to.be.above(
-	// 				Number(balance)
-	// 			)
-	// 		})
+			it("user should receive ether back", async () => {
+				expect(Number(await web3.eth.getBalance(user))).to.be.above(
+					Number(balance)
+				)
+			})
 
-	// 		it("user should receive proper amount of interest", async () => {
-	// 			//time synchronization problem make us check the 1-3s range for 2s deposit time
-	// 			balance = Number(await token.balanceOf(user))
-	// 			expect(balance).to.be.above(0)
-	// 			expect(balance % interestPerSecond).to.eq(0)
-	// 			expect(balance).to.be.below(interestPerSecond * 4)
-	// 		})
+			it("user should receive proper amount of interest", async () => {
+				//time synchronization problem make us check the 1-3s range for 2s deposit time
+				balance = Number(await token.balanceOf(user))
+				console.log({ balance, interestPerSecond })
+				expect(balance).to.be.above(0)
+				expect(balance % interestPerSecond).to.eq(0)
+				expect(balance).to.be.below(interestPerSecond * 4)
+			})
 
-	// 		it("depositer data should be reseted", async () => {
-	// 			expect(Number(await dbank.depositStart(user))).to.eq(0)
-	// 			expect(Number(await dbank.etherBalanceOf(user))).to.eq(0)
-	// 			expect(await dbank.isDeposited(user)).to.eq(false)
-	// 		})
-	// 	})
+			it("depositor data should be reset", async () => {
+				expect(Number(await dbank.depositStart(user))).to.eq(0)
+				expect(Number(await dbank.etherBalanceOf(user))).to.eq(0)
+				expect(await dbank.isDeposited(user)).to.eq(false)
+			})
+		})
 
-	// 	describe("failure", () => {
-	// 		it("withdrawing should be rejected", async () => {
-	// 			await dbank.deposit({ value: 10 ** 16, from: user }) //0.01 ETH
-	// 			await wait(2) //accruing interest
-	// 			await dbank
-	// 				.withdraw({ from: deployer })
-	// 				.should.be.rejectedWith(EVM_REVERT) //wrong user
-	// 		})
-	// 	})
-	// })
+		describe("failure", () => {
+			it("withdrawing should be rejected", async () => {
+				await dbank.deposit({ value: 10 ** 16, from: user }) //0.01 ETH
+				await wait(2) //accruing interest
+				await dbank
+					.withdraw({ from: deployer })
+					.should.be.rejectedWith(EVM_REVERT) //wrong user
+			})
+		})
+	})
 })
